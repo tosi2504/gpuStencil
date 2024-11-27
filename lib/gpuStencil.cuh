@@ -5,8 +5,6 @@
 #include "errorcheck.h"
 #include "kernels.cuh"
 
-#include <iostream>
-
 template <
     unsigned N, unsigned nRhs,
     unsigned numRowTiles,  // in units of tiles
@@ -28,24 +26,22 @@ template <
     
     cudaError_t err = cudaFuncSetAttribute(func, cudaFuncAttributeMaxDynamicSharedMemorySize, sizeShmem);
     if (err != cudaSuccess) {
-        std::cout << "1111111" << std::endl;
         return GENERIC_ERROR;
     }
-
+    
     func <<< nSites, numRowTiles*numRhsTiles, sizeShmem >>> 
         (d_d_Y, d_d_d_A, d_d_X, nPnts);
+    CLCE();
     if (cudaGetLastError() != cudaSuccess) {
-        std::cout << "2222222" << std::endl;
         return GENERIC_ERROR;
     }
-
+    
     CCE(cudaDeviceSynchronize());
-    // err = cudaDeviceSynchronize();
-    // if (err != cudaSuccess) {
-    //     std::cout << "3333333" << std::endl;
-    //     return GENERIC_ERROR;
-    // }
-
+    err = cudaDeviceSynchronize();
+    if (err != cudaSuccess) {
+        return GENERIC_ERROR;
+    }
+    
     return OK;
 }
 

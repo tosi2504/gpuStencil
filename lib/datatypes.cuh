@@ -47,6 +47,14 @@ complex<T> operator * (const complex<T> & left, const complex<T> & right) {
 }
 template<class T>
 __host__ __device__ inline
+complex<T> operator * (const unsigned left, const complex<T> & right) {
+    return complex<T>(
+        left*right.real,
+        left*right.imag
+    );
+}
+template<class T>
+__host__ __device__ inline
 complex<T> operator + (const complex<T> & left, const complex<T> & right) {
     return complex<T>(
         left.real + right.real,

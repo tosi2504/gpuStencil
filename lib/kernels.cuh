@@ -17,9 +17,9 @@ template <
     unsigned rowTileSize, // in units of index
     unsigned rhsTileSize
 > __global__ void ker_stencil2DBlocktilingV2 (
-    T * const * d_d_Y,
-    const T * const * const * d_d_d_A,
-    const T * const * d_d_X,
+    T * const * d_d_Y, // d_d_Y[iRhs][s*N + i]
+    const T * const * const * d_d_d_A, // d_d_d_A[s][p][i*N+j]
+    const T * const * d_d_X, // d_d_Y[iRhs][s*N + i]
     unsigned nPnts
 ) {
     const unsigned site = blockIdx.x;
@@ -44,8 +44,8 @@ template <
         shmemX[rowm(n, iRhs, nRhs, N)] = d_d_X[iRhs][N*site + n]; 
     }
 
-    const T * const * d_d_A = d_d_d_A[site];
-
+    
+    const T * const * d_d_A = d_d_d_A[site]; // wtf is happening here
     for (unsigned p = 0; p < nPnts; p++) {
         const T * const d_A = d_d_A[p];
         for (unsigned iiRow = 0; iiRow < N; iiRow += numRowTiles*rowTileSize) {
