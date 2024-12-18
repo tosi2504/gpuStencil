@@ -43,3 +43,24 @@ There are two main approaches to interface the geometrical information
     This is very memory safe but much more work.
 I think I will go for number one :)
 
+## Understanding Grids accelerator_for(...)
+```
+#define accelerator_for2dNB( iter1, num1, iter2, num2, nsimd, ... )	\
+  {									\
+    int nt=acceleratorThreads();					\ // nt = 2
+    typedef uint64_t Iterator;						\
+    auto lambda = [=] accelerator					\
+      (Iterator iter1,Iterator iter2,Iterator lane) mutable {		\
+      __VA_ARGS__;							\
+    };									\
+    dim3 cu_threads(nsimd,acceleratorThreads(),1);			\ // blockDim.x = nsimd = 32?
+                                                              // blockDim.y = acceleratorThreads() = 2
+                                                              // 
+    dim3 cu_blocks ((num1+nt-1)/nt,num2,1);				\
+    LambdaApply<<<cu_blocks,cu_threads,0,computeStream>>>(num1,num2,nsimd,lambda);	\
+  }
+```
+
+map : nt = 1, num1 = numSites, num2 = 1, nsimd = blockSize
+
+
